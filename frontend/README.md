@@ -2,7 +2,7 @@
 
 ## Información del proyecto
 
-**URL**:https://github.com/ediiidev/Dashboard-inventarios
+**URL**:https://github.com/ediiidev/Gestion-de-usuarios-de-ventas-de-inmuebles
 
 **Herramienta Lovable**
 
