@@ -1,4 +1,10 @@
-import { Building2, LayoutDashboard, LogIn, UserPlus, Home } from "lucide-react";
+import {
+  Building2,
+  LayoutDashboard,
+  LogIn,
+  UserPlus,
+  Home,
+} from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import {
@@ -12,9 +18,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-const mainItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-];
+const mainItems = [{ title: "Dashboard", url: "/", icon: LayoutDashboard }];
 
 const authItems = [
   { title: "Iniciar Sesión", url: "/login", icon: LogIn },
@@ -33,14 +37,20 @@ export function AppSidebar() {
               <Building2 className="w-5 h-5 text-sidebar-primary-foreground" />
             </div>
             <div>
-              <h2 className="text-sm font-display font-bold text-sidebar-accent-foreground">InmoGestión</h2>
-              <p className="text-xs text-sidebar-foreground/60">Real Estate</p>
+              <h2 className="text-sm font-display font-bold text-sidebar-accent-foreground">
+                InmoGestión
+              </h2>
+              <p className="text-xs text-sidebar-foreground/60">
+                Calidad Garantizada
+              </p>
             </div>
           </div>
         </div>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/50 text-xs uppercase tracking-wider">Principal</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sidebar-foreground/50 text-xs uppercase tracking-wider">
+            Principal
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainItems.map((item) => (
@@ -63,7 +73,9 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/50 text-xs uppercase tracking-wider">Cuenta</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sidebar-foreground/50 text-xs uppercase tracking-wider">
+            Cuenta
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {authItems.map((item) => (
