@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { User } from "../models/User.js";
 
@@ -24,18 +24,37 @@ export const register = async (req: Request, res: Response) => {
 };
 
 export const login = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
-  const user = await User.findOne({ where: { email } });
+  try {
+    const { email, password } = req.body;
 
-  if (user && (await bcrypt.compare(password, user.password))) {
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET!, {
-      expiresIn: "1d",
-    });
+    // 1. Buscar al usuario
+    const user = await User.findOne({ where: { email } });
+
+    // 2. IMPORTANTE: Validar si existe antes de comparar
+    if (!user) {
+      return res.status(401).json({ message: "Usuario no encontrado" });
+    }
+
+    // 3. Ahora sí, comparar de forma segura
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: "Contraseña incorrecta" });
+    }
+
+    // 4. Generar Token (Asegúrate de tener JWT_SECRET en tu .env)
+    const token = jwt.sign(
+      { id: user.id },
+      process.env.JWT_SECRET || "secret",
+      { expiresIn: "1d" },
+    );
+
     return res.json({
       token,
       user: { id: user.id, name: user.name, email: user.email },
     });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Error interno en el servidor" });
   }
-
-  res.status(401).json({ message: "Credenciales inválidas" });
 };
