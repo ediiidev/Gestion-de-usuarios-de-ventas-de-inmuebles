@@ -4,6 +4,8 @@ import { User } from "./User.js";
 
 export class House extends Model {
   public id!: number;
+  public title!: string;
+  public description!: string;
   public address!: string;
   public price!: number;
   public status!: string;
@@ -13,6 +15,8 @@ export class House extends Model {
 House.init(
   {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    title: { type: DataTypes.STRING, allowNull: false },
+    description: { type: DataTypes.STRING, allowNull: false },
     address: { type: DataTypes.STRING, allowNull: false },
     price: { type: DataTypes.FLOAT, allowNull: false },
     status: { type: DataTypes.STRING, defaultValue: "available" },

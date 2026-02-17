@@ -19,8 +19,14 @@ User.init(
       unique: true,
       validate: { isEmail: true },
     },
-    password: { type: DataTypes.STRING, allowNull: false },
+    password: { type: DataTypes.STRING, allowNull: false, field: "password" },
     isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
   },
-  { sequelize, modelName: "user" },
+  {
+    sequelize,
+    modelName: "User",
+    tableName: "users",
+    freezeTableName: true,
+    timestamps: false,
+  },
 );

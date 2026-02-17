@@ -4,8 +4,8 @@ import { User } from "../models/User.js";
 
 export const createHouse = async (req: any, res: Response) => {
   try {
-    const { address, price, status } = req.body;
-
+    const { title, description, address, price, status } = req.body;
+    console.log(req.user);
     // Validación de campos obligatorios
     if (!address || !price) {
       return res
@@ -14,6 +14,8 @@ export const createHouse = async (req: any, res: Response) => {
     }
 
     const house = await House.create({
+      title,
+      description,
       address,
       price,
       status,
@@ -26,9 +28,18 @@ export const createHouse = async (req: any, res: Response) => {
   }
 };
 
-export const getHouses = async (req: Request, res: Response) => {
+export const getHouses = async (req: any, res: Response) => {
   try {
+    //console.log("Contenido de req.user:", req.user);
+    const userId = req.user?.id; // ID de usuario extraído del Token
+    if (!userId) {
+      return res
+        .status(401)
+        .json({ error: "No se encontró el ID del usuario en el token" });
+    }
+
     const houses = await House.findAll({
+      where: { sellerId: userId },
       include: [
         { model: User, as: "seller", attributes: ["id", "name", "email"] },
       ],

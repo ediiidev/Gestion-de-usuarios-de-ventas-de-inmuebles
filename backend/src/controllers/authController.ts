@@ -29,14 +29,17 @@ export const login = async (req: Request, res: Response) => {
 
     // 1. Buscar al usuario
     const user = await User.findOne({ where: { email } });
-
-    // 2. IMPORTANTE: Validar si existe antes de comparar
+    //console.log("Password desde la DB:", user?.password);
+    // 2. Validar si existe antes de comparar
     if (!user) {
+      //console.log("Usuario no encontrado");
       return res.status(401).json({ message: "Usuario no encontrado" });
     }
-
-    // 3. Ahora sí, comparar de forma segura
-    const isMatch = await bcrypt.compare(password, user.password);
+    //console.log("Datos del usuario recuperado:", user.toJSON());
+    // 3. Comparar de forma segura
+    //const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.get("password"));
+    //console.log("Password real:", user.get("password"));
 
     if (!isMatch) {
       return res.status(401).json({ message: "Contraseña incorrecta" });
@@ -44,14 +47,18 @@ export const login = async (req: Request, res: Response) => {
 
     // 4. Generar Token (Asegúrate de tener JWT_SECRET en tu .env)
     const token = jwt.sign(
-      { id: user.id },
+      { id: user.get("id") },
       process.env.JWT_SECRET || "secret",
       { expiresIn: "1d" },
     );
 
     return res.json({
       token,
-      user: { id: user.id, name: user.name, email: user.email },
+      user: {
+        id: user.get("id"),
+        name: user.get("name"),
+        email: user.get("email"),
+      },
     });
   } catch (error) {
     console.error(error);

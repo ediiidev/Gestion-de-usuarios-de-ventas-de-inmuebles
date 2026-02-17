@@ -10,7 +10,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Rutas
+// Definición de los prefijos de las Rutas
 app.use("/auth", authRoutes);
 app.use("/houses", houseRoutes);
 app.use("/users", userRoutes);
