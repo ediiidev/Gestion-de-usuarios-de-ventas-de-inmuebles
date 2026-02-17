@@ -3,7 +3,8 @@ export interface Property {
   title: string;
   description: string;
   price: number;
-  location: string;
+  address: string;
+  location?: string;
   status: "En Venta" | "Vendido" | "Alquilado" | "Reservado";
   createdAt: string;
 }

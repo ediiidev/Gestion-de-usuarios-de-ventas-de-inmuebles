@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Building2, Mail, Lock } from "lucide-react";
 import authBg from "@/assets/auth-bg.jpg";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -24,11 +25,33 @@ const Login = () => {
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = (ev: React.FormEvent) => {
+  const handleSubmit = async (ev: React.FormEvent) => {
     ev.preventDefault();
     if (validate()) {
       // placeholder
-      navigate("/");
+      try {
+        // 1. Petición al backend
+        const response = await axios.post("http://localhost:5000/auth/login", {
+          email,
+          password,
+        });
+
+        // 2. Extraer el token y datos del usuario de la respuesta
+        const { token, user } = response.data;
+
+        // 3. Persistencia en LocalStorage
+        localStorage.setItem("token", token);
+        localStorage.setItem("userData", JSON.stringify(user));
+
+        // 4. Éxito y Redirección
+        console.log("Login exitoso, token guardado");
+        navigate("/");
+      } catch (error: any) {
+        // Manejo de errores (Usuario no encontrado o contraseña incorrecta)
+        const message =
+          error.response?.data?.message || "Error al conectar con el servidor";
+        setErrors({ server: message });
+      }
     }
   };
 

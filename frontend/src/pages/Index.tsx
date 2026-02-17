@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { PropertyModal } from "@/components/PropertyModal";
 import { Property } from "@/types/property";
@@ -30,54 +30,7 @@ import {
   TrendingUp,
   Home,
 } from "lucide-react";
-
-const initialProperties: Property[] = [
-  {
-    id: "1",
-    title: "Penthouse Vista al Mar",
-    description: "Amplio penthouse con terraza",
-    price: 450000,
-    location: "Cancún, QR",
-    status: "En Venta",
-    createdAt: "2025-12-01",
-  },
-  {
-    id: "2",
-    title: "Casa Colonial Centro",
-    description: "Casa restaurada del siglo XIX",
-    price: 320000,
-    location: "Mérida, YUC",
-    status: "Vendido",
-    createdAt: "2025-11-15",
-  },
-  {
-    id: "3",
-    title: "Departamento Polanco",
-    description: "2 recámaras, acabados de lujo",
-    price: 280000,
-    location: "CDMX",
-    status: "En Venta",
-    createdAt: "2026-01-10",
-  },
-  {
-    id: "4",
-    title: "Loft Industrial Roma",
-    description: "Espacios abiertos, doble altura",
-    price: 195000,
-    location: "CDMX",
-    status: "Alquilado",
-    createdAt: "2026-01-20",
-  },
-  {
-    id: "5",
-    title: "Villa Campestre",
-    description: "Jardín de 500m², alberca",
-    price: 520000,
-    location: "Valle de Bravo, MEX",
-    status: "Reservado",
-    createdAt: "2026-02-05",
-  },
-];
+import axios from "axios";
 
 const statusColors: Record<Property["status"], string> = {
   "En Venta": "bg-accent/15 text-accent border-accent/30",
@@ -87,7 +40,8 @@ const statusColors: Record<Property["status"], string> = {
 };
 
 const Index = () => {
-  const [properties, setProperties] = useState<Property[]>(initialProperties);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [modalOpen, setModalOpen] = useState(false);
@@ -97,26 +51,39 @@ const Index = () => {
     return properties.filter((p) => {
       const matchSearch =
         p.title.toLowerCase().includes(search.toLowerCase()) ||
-        p.location.toLowerCase().includes(search.toLowerCase());
+        p.address.toLowerCase().includes(search.toLowerCase());
       const matchStatus = statusFilter === "all" || p.status === statusFilter;
       return matchSearch && matchStatus;
     });
   }, [properties, search, statusFilter]);
 
-  const handleSave = (data: Omit<Property, "id" | "createdAt">) => {
-    if (editingProperty) {
-      setProperties((prev) =>
-        prev.map((p) => (p.id === editingProperty.id ? { ...p, ...data } : p)),
-      );
-    } else {
-      const newProp: Property = {
-        ...data,
-        id: crypto.randomUUID(),
-        createdAt: new Date().toISOString().slice(0, 10),
-      };
-      setProperties((prev) => [...prev, newProp]);
+  const handleSave = async (data: Omit<Property, "id" | "createdAt">) => {
+    const token = localStorage.getItem("token");
+    try {
+      if (editingProperty) {
+        // EDITAR: PUT http://localhost:5000/houses/:id
+        await axios.put(
+          `http://localhost:5000/houses/${editingProperty.id}`,
+          data,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+      } else {
+        // CREAR: POST http://localhost:5000/houses
+        const backendData = {
+          ...data,
+          address: (data as any).location, // Ajuste de mapeo
+        };
+        await axios.post("http://localhost:5000/houses", backendData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+      fetchProperties(); // Refrescar la tabla
+      setModalOpen(false);
+    } catch (error) {
+      alert("Error al procesar la solicitud");
     }
-    setEditingProperty(null);
   };
 
   const handleEdit = (property: Property) => {
@@ -124,9 +91,37 @@ const Index = () => {
     setModalOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    setProperties((prev) => prev.filter((p) => p.id !== id));
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("¿Estás seguro de eliminar este inmueble?")) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`http://localhost:5000/houses/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProperties((prev) => prev.filter((p) => p.id !== id));
+    } catch (error) {
+      alert("No se pudo eliminar el inmueble");
+    }
   };
+
+  const fetchProperties = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:5000/houses", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProperties(response.data);
+    } catch (error) {
+      console.error("Error al cargar propiedades:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProperties();
+  }, []);
 
   const totalValue = properties.reduce((s, p) => s + p.price, 0);
   const forSale = properties.filter((p) => p.status === "En Venta").length;
@@ -246,7 +241,7 @@ const Index = () => {
                         {p.title}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {p.location}
+                        {p.address || "Sin ubicación"}
                       </TableCell>
                       <TableCell className="font-medium text-foreground">
                         ${p.price.toLocaleString()}
@@ -260,7 +255,7 @@ const Index = () => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {p.createdAt}
+                        {new Date(p.createdAt).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
