@@ -16,17 +16,43 @@ Estas son las tecnologias:
 - Express
 - PostgreSQL
 - Sequelize
+- Axios
 
-  
-**Para Tener el monorepo**
+
+**Prerrequisitos**
+Estos son los prerrequisitos:
+
+- Node.js: v18 o superior
+- PostgreSQL: IMPORTANTE tener creada la base de datos real_estate_management en pgAdmin antes de correr el backend
+
+**Para Tener el monorepo y activar el proyecto**
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Paso 1: Clonar el repositorio usando la terminal
+git clone https://github.com/ediiidev/Gestion-de-usuarios-de-ventas-de-inmuebles
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Paso 2: Navegar a la carpeta del proyecto
+cd Gestion-de-usuarios-de-ventas-de-inmuebles
 
+# Paso 3: Activar el frontend (terminal 1)
+cd frontend
+npm install
+npm run dev
+
+# Paso 4: Activar el backend (terminal 2)
+cd backend
+
+IMPORTANTE: crear el archivo .env con los siguientes datos: 
+DB_NAME=real_estate_management
+DB_USER=postgres
+DB_PASS=[contraseña_de_la_BD]
+DB_HOST=localhost
+JWT_SECRET=[clave_secreta]
+PORT=5000
+
+Continua ejecutanto en la terminal
+npm install
+npx tsx src/index.ts
 ```
 **Muestra del frontend**
 
